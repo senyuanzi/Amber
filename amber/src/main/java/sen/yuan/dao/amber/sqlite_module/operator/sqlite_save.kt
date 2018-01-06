@@ -7,14 +7,13 @@ import sen.yuan.dao.amber.Amber
 import sen.yuan.dao.amber.e
 import sen.yuan.dao.amber.sqlite_module.annotation.PrimaryKey
 import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.defaultType
 import kotlin.reflect.full.primaryConstructor
+import kotlin.reflect.full.starProjectedType
 
 /**
  * Created by senyuanzi on 2016/11/28.
  */
-
-inline fun <T : Any> SQLiteDatabase.testCreateTable(data: T) {
+fun <T : Any> SQLiteDatabase.tryCreateTable(data: T) {
     val mClass = data.javaClass.kotlin
     val name = "${mClass.simpleName}"
     val parameters = mClass.primaryConstructor!!.parameters
@@ -23,9 +22,9 @@ inline fun <T : Any> SQLiteDatabase.testCreateTable(data: T) {
     val tablePairs = parameters.associate {
         val pair = it.name!! to it.type.let {
             when (it) {
-                Boolean::class.defaultType, String::class.defaultType -> TEXT
-                Int::class.defaultType -> INTEGER
-                Float::class.defaultType, Double::class.defaultType -> REAL
+                Boolean::class.starProjectedType, String::class.starProjectedType -> TEXT
+                Int::class.starProjectedType -> INTEGER
+                Float::class.starProjectedType, Double::class.starProjectedType -> REAL
                 else -> TEXT
             }
         }
@@ -56,7 +55,7 @@ fun <T : Any> T.save(): Long {
 
 
     return Amber.database.use {
-        testCreateTable(this@save)
+        tryCreateTable(this@save)
         insert(name, *valuePairs)
     }
 }

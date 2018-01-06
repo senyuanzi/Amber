@@ -10,7 +10,7 @@ inline fun SQLiteDatabase.tryDo(functor: SQLiteDatabase.() -> Any?): Any? {
     return try {
         functor()
     } catch (ex: SQLiteException) {
-        if (ex.message?.contains("no such table") ?: false) "no such table"
+        if (ex.message?.contains("no such table") == true) "no such table"
         else throw ex
     }
 }

@@ -16,7 +16,7 @@ inline fun <reified T : Any> classParser(): RowParser<T> {
     val constructors = clazz.declaredConstructors.filter {
         val types = it.parameterTypes
         !it.isVarArgs && Modifier.isPublic(it.modifiers) &&
-                types != null && types.size > 0
+                types != null && types.isNotEmpty()
     }
     if (constructors.isEmpty())
         throw AnkoException(
