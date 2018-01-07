@@ -2,13 +2,16 @@ package sen.yuan.dao.amber.sqlite_module.operator
 
 import android.database.sqlite.SQLiteDatabase
 import com.google.gson.Gson
-import org.jetbrains.anko.db.*
+import org.jetbrains.anko.db.PRIMARY_KEY
+import org.jetbrains.anko.db.UNIQUE
+import org.jetbrains.anko.db.createTable
+import org.jetbrains.anko.db.insert
 import sen.yuan.dao.amber.Amber
 import sen.yuan.dao.amber.e
+import sen.yuan.dao.amber.sqlite_module.annotation.Ignore
 import sen.yuan.dao.amber.sqlite_module.annotation.PrimaryKey
+import sen.yuan.dao.amber_reflect.containsAnnotation
 import kotlin.reflect.full.declaredMemberProperties
-import kotlin.reflect.full.primaryConstructor
-import kotlin.reflect.full.starProjectedType
 
 /**
  * Created by senyuanzi on 2016/11/28.
@@ -16,21 +19,15 @@ import kotlin.reflect.full.starProjectedType
 fun <T : Any> SQLiteDatabase.tryCreateTable(data: T) {
     val mClass = data.javaClass.kotlin
     val name = "${mClass.simpleName}"
-    val parameters = mClass.primaryConstructor!!.parameters
+    val properties = mClass.declaredMemberProperties
 
-
-    val tablePairs = parameters.associate {
-        val pair = it.name!! to it.type.let {
-            when (it) {
-                Boolean::class.starProjectedType, String::class.starProjectedType -> TEXT
-                Int::class.starProjectedType -> INTEGER
-                Float::class.starProjectedType, Double::class.starProjectedType -> REAL
-                else -> TEXT
-            }
-        }
-        if (it.annotations.map { it.annotationClass }.contains(PrimaryKey::class)) pair.copy(second = pair.second + PRIMARY_KEY + UNIQUE).apply { e("reflect_columns", "$first:$second") }
-        else pair.apply { e("reflect_columns", "$first:$second") }
-    }.toList().toTypedArray()
+    val tablePairs = properties
+            .filter { !it.containsAnnotation(Ignore::class) }
+            .map {
+                it.name to if (it.containsAnnotation(PrimaryKey::class)) {
+                    it.sqliteType() + PRIMARY_KEY + UNIQUE
+                } else it.sqliteType()
+            }.toTypedArray()
 
     this.createTable(name, true, *tablePairs)
 }

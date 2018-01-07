@@ -6,4 +6,9 @@ package sen.yuan.dao.amber.sqlite_module.annotation
 
 //主键
 @Target(AnnotationTarget.PROPERTY)
-annotation class PrimaryKey()
+annotation class PrimaryKey
+
+//忽略
+@Target(AnnotationTarget.PROPERTY)
+annotation class Ignore
+

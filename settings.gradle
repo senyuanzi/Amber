@@ -1,1 +1,1 @@
-include ':Amber_example', ':app', ':base', ':instantapp', ':amber'
+include ':Amber_example', ':app', ':base', ':instantapp', ':amber', ':amber_reflect'
